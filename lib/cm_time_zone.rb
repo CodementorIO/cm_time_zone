@@ -155,14 +155,26 @@ module CmTimeZone
     "Samoa"                        => "Pacific/Apia"
   }.freeze
 
-  def self.all
-    @zones_map ||= MAPPING.each_with_object({}) do |(name, _), zones|
-      time_zone = ActiveSupport::TimeZone.new(name)
-      zones[name] = time_zone if time_zone
-    end.values.sort_by(&:name)
-  end
+  class << self
+    def all
+      @zones ||= zones_map.values.sort_by(&:name)
+    end
 
-  def self.exists?(time_zone)
-    MAPPING[time_zone] != nil
+    def find(time_zone_name)
+      zones_map[time_zone_name]
+    end
+
+    def exists?(time_zone_name)
+      find(time_zone_name) != nil
+    end
+
+    private
+
+    def zones_map
+      @zones_map ||= MAPPING.each_with_object({}) do |(name, _), zones|
+        time_zone = ActiveSupport::TimeZone.new(name)
+        zones[name] = time_zone if time_zone
+      end
+    end
   end
 end
